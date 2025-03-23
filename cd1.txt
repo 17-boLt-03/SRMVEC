@@ -1,57 +1,73 @@
-#include<stdio.h>
-#include<conio.h>
-#include<malloc.h>
-#include<ctype.h>
+#include <stdio.h>
+#include <conio.h>
+#include <malloc.h>
+#include <ctype.h>
+
 void main() {
-int i = 0, j = 0, x = 0, n, flag = 0;
-void *p, *add[15];
-char ch, srch, b[15], d[15], c;
-clrscr();
-printf("expression terminated by $: ");
-while ((c = getchar()) != '$') {
-b[i] = c;
-i++;
-}
-n = i - 1;
-printf("\ngiven expression: ");
-i = 0;
-while (i <= n) {
-printf("%c", b[i]);
-i++;
-}
-printf("\nsymbol table\n");
-printf("\nsymbol\taddr\ttype\n");
-while (j <= n) {
-c = b[j];
-if (isalpha(toascii(c))) {
-if (j == n) {
-p = malloc(c);
-add[x] = p;
-d[x] = c;
-printf("%c\t%d\tidentifier\n", c, p);
-} else {
-ch = b[j + 1];
-if (ch == '/' || ch == '+' || ch == '-' || ch == '*' || ch == '=') {
-p = malloc(c);
-add[x] = p;
-d[x] = c;
-printf("%c\t%d\tidentifier\n", c, p);
-x++;
-}
-}
-}
-j++;
-}
-printf("Enter the identifier to be searched\n");
-srch = getch();
-for (i = 0; i <= x; i++) {
-if (srch == d[i]) {
-printf("symbol found\n");
-printf("%c @Adrress %d \n", srch, add[i]);
-flag = 1;
-}
-}
-if (flag == 0)
-printf("symbol not found\n");
-getch();
+    int i = 0, j = 0, x = 0, n, flag = 0;
+    void *p, *add[15];
+    char ch, srch, b[15], d[15], c;
+    
+    clrscr();
+    printf("expression terminated by $: ");
+    
+    // Read input expression
+    while ((c = getchar()) != '$') {
+        b[i] = c;
+        i++;
+    }
+    n = i - 1;
+    
+    // Display the given expression
+    printf("\ngiven expression: ");
+    i = 0;
+    while (i <= n) {
+        printf("%c", b[i]);
+        i++;
+    }
+    
+    // Symbol table header
+    printf("\nsymbol table\n");
+    printf("\nsymbol\taddr\ttype\n");
+    
+    // Process the expression and create the symbol table
+    while (j <= n) {
+        c = b[j];
+        if (isalpha(toascii(c))) {
+            if (j == n) {
+                p = malloc(c);
+                add[x] = p;
+                d[x] = c;
+                printf("%c\t%d\tidentifier\n", c, p);
+            } else {
+                ch = b[j + 1];
+                if (ch == '/' || ch == '+' || ch == '-' || ch == '*' || ch == '=') {
+                    p = malloc(c);
+                    add[x] = p;
+                    d[x] = c;
+                    printf("%c\t%d\tidentifier\n", c, p);
+                    x++;
+                }
+            }
+        }
+        j++;
+    }
+    
+    // Search for an identifier in the symbol table
+    printf("Enter the identifier to be searched\n");
+    srch = getch();
+    
+    for (i = 0; i <= x; i++) {
+        if (srch == d[i]) {
+            printf("symbol found\n");
+            printf("%c @Address %d \n", srch, add[i]);
+            flag = 1;
+        }
+    }
+    
+    if (flag == 0) {
+        printf("symbol not found\n");
+    }
+    
+    getch();
 }
