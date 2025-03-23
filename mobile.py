@@ -5,6 +5,7 @@ import numpy as np
 import socket
 import os
 import time
+import subprocess
 
 # Load Trained Model
 model_dict = pickle.load(open('./model.p', 'rb'))
@@ -13,6 +14,7 @@ expected_features = model.n_features_in_
 
 # Define Image Folder
 frame_folder = "/root/ISL_Working/frame"
+os.makedirs(frame_folder, exist_ok=True)  # Ensure folder exists
 
 # MediaPipe Hand Detection Setup
 mp_hands = mp.solutions.hands
@@ -24,26 +26,34 @@ hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.3)
 labels_dict = {0: 'A', 1: 'B', 2: 'C', 3: 'D', 4: 'E', 5: 'I', 6: 'L'}
 
 # Socket Server Setup
-server_ip = "192.168.4.18"  # Change to your PC's IP
+server_ip = "192.168.4.18"  # Laptop's IP
 server_port = 5000
+raspberry_ip = "192.168.4.1"  # Raspberry Pi's IP
+http_port = 8000  # Raspberry Pi's HTTP Server Port
+
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((server_ip, server_port))
 server_socket.listen(1)
 
 print("[INFO] Waiting for connection from Raspberry Pi...")
 
-def predict_sign(image_path):
+def download_frame(filename):
+    """Downloads the frame from Raspberry Pi using wget"""
+    file_url = f"http://{raspberry_ip}:{http_port}/{filename}"
+    local_path = os.path.join(frame_folder, filename)
+
+    print(f"[INFO] Downloading: {file_url}")
+    
     try:
-        # Wait for file to appear (Max 5 sec)
-        wait_time = 0
-        while not os.path.exists(image_path) and wait_time < 5:
-            time.sleep(0.5)
-            wait_time += 0.5
+        subprocess.run(["wget", "-O", local_path, file_url], check=True)
+        return local_path
+    except subprocess.CalledProcessError as e:
+        print(f"[ERROR] wget failed: {e}")
+        return None
 
-        if not os.path.exists(image_path):
-            print(f"[ERROR] File not found after waiting: {image_path}")
-            return "Error: File Not Found"
-
+def predict_sign(image_path):
+    """Processes image and predicts sign language gesture"""
+    try:
         # Load and Process Image
         img = cv2.imread(image_path)
         if img is None:
@@ -99,10 +109,15 @@ while True:
         filename = conn.recv(1024).decode().strip()
         print(f"[INFO] Received filename: '{filename}'")
 
-        # Predict the class
-        image_path = os.path.join(frame_folder, filename)
-        prediction = predict_sign(image_path)
-        print(f"[INFO] Predicted sign: {prediction}")
+        # Download the frame from Raspberry Pi
+        image_path = download_frame(filename)
+
+        if image_path:
+            # Predict the class
+            prediction = predict_sign(image_path)
+            print(f"[INFO] Predicted sign: {prediction}")
+        else:
+            prediction = "Error: Download Failed"
 
         # Send prediction back to Raspberry Pi
         conn.sendall(prediction.encode())
