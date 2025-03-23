@@ -1,0 +1,187 @@
+                                                  basic_block.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Listnode {
+    char data[50];
+    int leader, block, u_goto, c_goto;
+    struct Listnode *next;
+    char label[10], target[10];
+} *temp, *cur, *first = NULL, *last = NULL, *cur1;
+
+void createnode(char code[50]) {
+    temp = (struct Listnode *)malloc(sizeof(struct Listnode));
+    strcpy(temp->data, code);
+    strcpy(temp->label, "");
+    strcpy(temp->target, "");
+    temp->leader = 0;
+    temp->block = 0;
+    temp->u_goto = 0;
+    temp->c_goto = 0;
+    temp->next = NULL;
+
+    if (first == NULL) {
+        first = temp;
+        last = temp;
+    } else {
+        last->next = temp;
+        last = temp;
+    }
+}
+
+int main() {
+    char codeline[50];
+    char c, dup[50], target[10];
+    char *substring, *token;
+    int i = 0, block, block1;
+    int j = 0;
+    FILE *fpr = fopen("cdp.txt", "r");
+
+    if (fpr == NULL) {
+        printf("Error: Unable to open file cdp.txt\n");
+        return 1;
+    }
+
+    // Read code lines from file and create nodes
+    while ((c = getc(fpr)) != EOF) {
+        if (c != '\n') {
+            codeline[i++] = c;
+        } else {
+            codeline[i] = '\0';
+            createnode(codeline);
+            i = 0;
+        }
+    }
+
+    if (i > 0) {
+        codeline[i] = '\0';
+        createnode(codeline);
+    }
+
+    fclose(fpr);
+
+    // Identify leaders and goto statements
+    cur = first;
+    cur->leader = 1;
+
+    while (cur != NULL) {
+        if (strstr(cur->data, "if") != NULL) {
+            cur->c_goto = 1;
+            if (cur->next != NULL) cur->next->leader = 1;
+        } else if (strstr(cur->data, "goto") != NULL) {
+            cur->u_goto = 1;
+            if (cur->next != NULL) cur->next->leader = 1;
+        } else if (strstr(cur->data, "call") != NULL || strstr(cur->data, "return") != NULL) {
+            cur->leader = 1;
+            if (cur->next != NULL) cur->next->leader = 1;
+        }
+        if (strchr(cur->data, ':') != NULL) {
+            cur->leader = 1;
+        }
+        cur = cur->next;
+    }
+
+    // Identify labels and targets
+    cur = first;
+    while (cur != NULL) {
+        if (cur->u_goto || cur->c_goto) {
+            substring = strchr(cur->data, ':');
+            if (substring != NULL) {
+                token = strstr(substring, "L");
+                if (token != NULL)
+                    strcpy(cur->target, token);
+            } else {
+                substring = strstr(cur->data, "L");
+                if (substring != NULL)
+                    strcpy(cur->target, substring);
+            }
+        }
+
+        if (strchr(cur->data, ':') != NULL) {
+            strcpy(dup, cur->data);
+            token = strtok(dup, ":");
+            if (token != NULL)
+                strcpy(cur->label, token);
+        }
+        cur = cur->next;
+    }
+
+    // Identify basic blocks
+    cur = first;
+    j = 0;
+    while (cur != NULL) {
+        if (cur->leader) j++;
+        cur->block = j;
+        cur = cur->next;
+    }
+
+    // Print basic blocks
+    printf("\n\n......Basic Blocks......\n");
+    cur = first;
+    int current_block = -1;
+
+    while (cur != NULL) {
+        if (cur->block != current_block) {
+            current_block = cur->block;
+            printf("\nBlock %d:\n", current_block);
+        }
+        printf("%s\n", cur->data);
+        cur = cur->next;
+    }
+
+    // Print control flow
+    printf("\n\t\t.......Control Flow.......\n\n");
+    cur = first;
+
+    while (cur != NULL) {
+        if (cur->next == NULL || cur->block != cur->next->block) {
+            block = cur->block;
+
+            if (cur->u_goto) {
+                strcpy(target, cur->target);
+                cur1 = first;
+                while (cur1 != NULL) {
+                    if (strcmp(cur1->label, target) == 0) {
+                        block1 = cur1->block;
+                        printf("Block %d ----------> Block %d\n", block, block1);
+                        break;
+                    }
+                    cur1 = cur1->next;
+                }
+            } else if (cur->c_goto) {
+                strcpy(target, cur->target);
+                cur1 = first;
+                while (cur1 != NULL) {
+                    if (strcmp(cur1->label, target) == 0) {
+                        block1 = cur1->block;
+                        printf("Block %d ---TRUE---> Block %d ---FALSE---> Block %d\n", block, block1, block + 1);
+                        break;
+                    }
+                    cur1 = cur1->next;
+                }
+            } else if (strstr(cur->data, "return") == NULL) {
+                printf("Block %d ----------> Block %d\n", block, block + 1);
+            } else {
+                printf("Block %d ----------> NULL\n", block);
+            }
+        }
+        cur = cur->next;
+    }
+
+    printf("Block %d ----------> NULL\n", last->block);
+
+    return
+
+      
+                                                    cdp.txt
+
+m <- 0
+v <- 0
+L1: if v < n goto L2
+r <- v
+s <- 0
+return
+L2: if r >= n goto L1
+v <- v + 1
