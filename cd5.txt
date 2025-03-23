@@ -1,0 +1,231 @@
+                                                      lexbnf.l
+
+%{
+#include "yaccbnf.tab.h"
+#include <stdio.h>
+#include <string.h>
+int LineNo = 1;
+%}
+
+identifier    [a-zA-Z][_a-zA-Z0-9]*
+number        [0-9]+|([0-9]*\.[0-9]+)
+
+%%
+main\(\)      { return MAIN; }
+if            { return IF; }
+else          { return ELSE; }
+while         { return WHILE; }
+int | char | float { return TYPE; }
+
+{identifier}  { strcpy(yylval.var, yytext); return VAR; }
+{number}      { strcpy(yylval.var, yytext); return NUM; }
+
+\< | \> | \>= | \<= | ==  { strcpy(yylval.var, yytext); return RELOP; }
+
+[ \t] ;  // Ignore spaces and tabs
+\n        { LineNo++; }
+.         { return yytext[0]; }
+%%
+int yywrap() {
+    return 1;
+}
+
+                                                          yaccbnf.y
+
+%{
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct quad {
+    char op[5];
+    char arg1[10];
+    char arg2[10];
+    char result[10];
+} QUAD[30];
+
+struct stack {
+    int items[100];
+    int top;
+} stk;
+
+int Index = 0, tIndex = 0, StNo, Ind, tInd;
+extern int LineNo;
+
+void push(int data);
+int pop();
+void AddQuadruple(char op[5], char arg1[10], char arg2[10], char result[10]);
+%}
+
+%union {
+    char var[10];
+}
+
+%token <var> NUM VAR RELOP
+%token MAIN IF ELSE WHILE TYPE
+%type <var> EXPR ASSIGNMENT CONDITION IFST ELSEST WHILELOOP
+%left '-' '+'
+%left '*' '/'
+%%
+PROGRAM : MAIN BLOCK ;
+BLOCK   : '{' CODE '}' ;
+CODE    : BLOCK
+        | STATEMENT CODE
+        | STATEMENT ;
+STATEMENT : DESCT ';'
+          | ASSIGNMENT ';'
+          | CONDST
+          | WHILEST ;
+DESCT   : TYPE VARLIST ;
+VARLIST : VAR ',' VARLIST
+        | VAR ;
+ASSIGNMENT : VAR '=' EXPR {
+                    strcpy(QUAD[Index].op, "=");
+                    strcpy(QUAD[Index].arg1, $3);
+                    strcpy(QUAD[Index].arg2, "");
+                    strcpy(QUAD[Index].result, $1);
+                    strcpy($$, QUAD[Index++].result);
+                };
+EXPR    : EXPR '+' EXPR { AddQuadruple("+", $1, $3, $$); }
+        | EXPR '-' EXPR { AddQuadruple("-", $1, $3, $$); }
+        | EXPR '*' EXPR { AddQuadruple("*", $1, $3, $$); }
+        | EXPR '/' EXPR { AddQuadruple("/", $1, $3, $$); }
+        | '-' EXPR %prec UMINUS { AddQuadruple("UMIN", $2, "", $$); }
+        | '(' EXPR ')' { strcpy($$, $2); }
+        | VAR
+        | NUM ;
+CONDST  : IFST {
+                    Ind = pop();
+                    sprintf(QUAD[Ind].result, "%d", Index);
+                    Ind = pop();
+                    sprintf(QUAD[Ind].result, "%d", Index);
+                }
+        | IFST ELSEST ;
+IFST    : IF '(' CONDITION ')' {
+                    strcpy(QUAD[Index].op, "==");
+                    strcpy(QUAD[Index].arg1, $3);
+                    strcpy(QUAD[Index].arg2, "FALSE");
+                    strcpy(QUAD[Index].result, "-1");
+                    push(Index++);
+                } BLOCK {
+                    strcpy(QUAD[Index].op, "GOTO");
+                    strcpy(QUAD[Index].arg1, "");
+                    strcpy(QUAD[Index].arg2, "");
+                    strcpy(QUAD[Index].result, "-1");
+                    push(Index++);
+                };
+ELSEST  : ELSE {
+                    tInd = pop();
+                    Ind = pop();
+                    push(tInd);
+                    sprintf(QUAD[Ind].result, "%d", Index);
+                } BLOCK {
+                    Ind = pop();
+                    sprintf(QUAD[Ind].result, "%d", Index);
+                };
+CONDITION : VAR RELOP VAR {
+                    AddQuadruple($2, $1, $3, $$);
+                    StNo = Index - 1;
+                }
+          | VAR
+          | NUM ;
+WHILEST : WHILELOOP {
+                    Ind = pop();
+                    sprintf(QUAD[Ind].result, "%d", StNo);
+                    Ind = pop();
+                    sprintf(QUAD[Ind].result, "%d", Index);
+                };
+WHILELOOP : WHILE '(' CONDITION ')' {
+                    strcpy(QUAD[Index].op, "==");
+                    strcpy(QUAD[Index].arg1, $3);
+                    strcpy(QUAD[Index].arg2, "FALSE");
+                    strcpy(QUAD[Index].result, "-1");
+                    push(Index++);
+                } BLOCK {
+                    strcpy(QUAD[Index].op, "GOTO");
+                    strcpy(QUAD[Index].arg1, "");
+                    strcpy(QUAD[Index].arg2, "");
+                    strcpy(QUAD[Index].result, "-1");
+                    push(Index++);
+                };
+%%
+int main(int argc, char *argv[]) {
+    FILE *fp;
+    int i;
+    stk.top = -1;
+
+    if (argc > 1) {
+        fp = fopen(argv[1], "r");
+        if (!fp) {
+            printf("\nFile not found");
+            exit(0);
+        }
+        yyin = fp;
+    }
+
+    yyparse();
+    printf("\n\n\t\t --------------------------------------");
+    printf("\n\t\t Pos Operator\t Arg1\t Arg2\t Result");
+    printf("\n\t\t --------------------------------------");
+
+    for (i = 0; i < Index; i++) {
+        printf("\n\t\t %d\t %s\t %s\t %s\t %s", i, QUAD[i].op, QUAD[i].arg1, QUAD[i].arg2, QUAD[i].result);
+    }
+
+    printf("\n\t\t --------------------------------------\n\n");
+    return 0;
+}
+
+void push(int data) {
+    if (++stk.top == 100) {
+        printf("\nStack overflow\n");
+        exit(0);
+    }
+    stk.items[stk.top] = data;
+}
+
+int pop() {
+    if (stk.top == -1) {
+        printf("\nStack underflow\n");
+        exit(0);
+    }
+    return stk.items[stk.top--];
+}
+
+void AddQuadruple(char op[5], char arg1[10], char arg2[10], char result[10]) {
+    strcpy(QUAD[Index].op, op);
+    strcpy(QUAD[Index].arg1, arg1);
+    strcpy(QUAD[Index].arg2, arg2);
+    sprintf(QUAD[Index].result, "t%d", tIndex++);
+    strcpy(result, QUAD[Index++].result);
+}
+
+void yyerror() {
+    printf("\nError on line no: %d", LineNo);
+}
+
+
+                                                            input.c
+
+main()
+{
+    int a, b, c;
+    a = 10;
+    b = 20;
+    if (a < b)
+    {
+        a = a + b;
+    }
+    while (a < b)
+    {
+        a = a + b;
+    }
+    if (a <= b)
+    {
+        c = a - b;
+    }
+    else
+    {
+        c = a + b;
+    }
+}
