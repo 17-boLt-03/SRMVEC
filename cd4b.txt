@@ -1,0 +1,43 @@
+%{
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+%}
+
+%token let dig
+
+%%
+TERM : XTERM '\n' {
+            printf("\nAccepted\n");
+            exit(0);
+        }
+     | error {
+            printf("\nRejected\n");
+            exit(0);
+        }
+     ;
+
+XTERM : XTERM let
+      | XTERM dig
+      | let
+      ;
+
+%%
+
+int yylex() {
+    char ch;
+    while ((ch = getchar()) == ' ' || ch == '\t'); // Skip spaces and tabs
+    if (isalpha(ch)) return let;  // Return token for letters
+    if (isdigit(ch)) return dig;  // Return token for digits
+    return ch;  // Return the character as is (e.g., for EOF or special characters)
+}
+
+int main() {
+    printf("Enter a variable: ");
+    yyparse();  // Start parsing the input
+    return 0;
+}
+
+void yyerror(const char *s) {
+    printf("Error: %s\n", s);  // Print error message when there's a parsing error
+}
