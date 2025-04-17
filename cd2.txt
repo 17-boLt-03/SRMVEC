@@ -1,7 +1,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <conio.h>
+#include <stdlib.h>
 
 void keyword(char str[10]) {
     if (strcmp("for", str) == 0 || strcmp("while", str) == 0 || strcmp("do", str) == 0 ||
@@ -14,22 +14,37 @@ void keyword(char str[10]) {
     }
 }
 
-void main() {
+int main() {
     FILE *f1, *f2, *f3;
     char c, str[10], st1[10];
     int num[100], lineno = 0, tokenvalue = 0, i = 0, j = 0, k = 0;
 
-    clrscr();
-    printf("\nEnter the C program: ");
+    printf("\nEnter the C program (terminate input with Ctrl+D): ");
+
     f1 = fopen("input", "w");
-    
-    while ((c = getchar()) != EOF)
+    if (!f1) {
+        perror("Error opening file for writing");
+        return 1;
+    }
+
+    while ((c = getchar()) != EOF) {
         putc(c, f1);
+    }
     fclose(f1);
-    
+
     f1 = fopen("input", "r");
+    if (!f1) {
+        perror("Error opening input file for reading");
+        return 1;
+    }
+
     f2 = fopen("identifier", "w");
     f3 = fopen("specialchar", "w");
+    if (!f2 || !f3) {
+        perror("Error opening identifier or specialchar file");
+        fclose(f1);
+        return 1;
+    }
 
     while ((c = getc(f1)) != EOF) {
         if (isdigit(c)) {
@@ -51,15 +66,14 @@ void main() {
             putc(' ', f2);
             ungetc(c, f1);
         } else if (c == ' ' || c == '\t') {
-            printf(" ");
+            // Ignore spaces and tabs
         } else if (c == '\n') {
             lineno++;
         } else {
             putc(c, f3);
         }
     }
-
-    fclose(f2);
+fclose(f2);
     fclose(f3);
     fclose(f1);
 
@@ -70,6 +84,11 @@ void main() {
     printf("\n");
 
     f2 = fopen("identifier", "r");
+    if (!f2) {
+        perror("Error opening identifier file for reading");
+        return 1;
+    }
+
     k = 0;
     printf("The keywords and identifiers are: ");
     while ((c = getc(f2)) != EOF) {
@@ -84,6 +103,11 @@ void main() {
     fclose(f2);
 
     f3 = fopen("specialchar", "r");
+    if (!f3) {
+        perror("Error opening specialchar file for reading");
+        return 1;
+    }
+
     printf("\nSpecial characters are: ");
     while ((c = getc(f3)) != EOF) {
         printf("%c\t", c);
@@ -91,6 +115,6 @@ void main() {
     printf("\n");
     fclose(f3);
 
-    printf("Total number of lines are: %d", lineno);
-    getch();
+    printf("Total number of lines are: %d\n", lineno);
+    return 0;
 }
