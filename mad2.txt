@@ -1,0 +1,77 @@
+https://drive.google.com/drive/folders/19NAcOqwhvBQc0_inXYfraZJkqnQBPy8J?usp=sharing
+
+                      Activity_main.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/activity_main"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:padding="16dp"
+tools:context=".MainActivity">
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="80dp"
+android:orientation="horizontal"
+android:layout_centerHorizontal="true">
+<ImageView
+android:id="@+id/imageView1"
+android:layout_width="100dp"
+android:layout_height="100dp"
+android:layout_marginRight="20dp"
+android:src="@drawable/dice_1" />
+<ImageView
+android:id="@+id/imageView2"
+android:layout_width="100dp"
+android:layout_height="100dp"
+android:src="@drawable/dice_1" />
+</LinearLayout>
+<Button
+android:id="@+id/rollDices"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Roll Dice"
+android:textSize="20sp"
+android:layout_alignParentBottom="true"
+android:layout_marginBottom="30dp"
+android:layout_centerHorizontal="true" />
+</RelativeLayout>
+
+
+                    Main_Activity.java
+package com.example.dicer;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import androidx.appcompat.app.AppCompatActivity; // Updated import for AppCompatActivity
+import java.util.Random;
+public class MainActivity extends AppCompatActivity {
+public static final Random RANDOM = new Random();
+private Button rollDices;
+private ImageView imageView1, imageView2;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+rollDices = findViewById(R.id.rollDices);
+imageView1 = findViewById(R.id.imageView1);
+imageView2 = findViewById(R.id.imageView2);
+rollDices.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View view) {
+int value1 = randomDiceValue();
+int value2 = randomDiceValue();
+int res1 = getResources().getIdentifier("dice_" + value1, "drawable", getPackageName());
+int res2 = getResources().getIdentifier("dice_" + value2, "drawable", getPackageName());
+imageView1.setImageResource(res1);
+imageView2.setImageResource(res2);
+}
+});
+}
+public static int randomDiceValue() {
+return RANDOM.nextInt(6) + 1; // Returns a random value between 1 and 6
+}
+}
