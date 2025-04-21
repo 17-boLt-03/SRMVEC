@@ -1,0 +1,97 @@
+                Activity_main.xml
+                
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="#505050">
+<RelativeLayout
+android:id="@+id/firstlayout"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:gravity="center"
+android:layout_marginTop="80dp">
+<TextView
+android:id="@+id/display"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Button will appear after 7 seconds"
+android:textSize="19sp" />
+</RelativeLayout>
+<RelativeLayout
+android:id="@+id/secondlayout"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_below="@+id/firstlayout"
+android:gravity="center">
+<TextView
+android:id="@+id/timer"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:gravity="center_horizontal"
+android:text="7"
+android:layout_marginTop="80dp"
+android:textSize="36sp"/>
+</RelativeLayout>
+<RelativeLayout
+android:id="@+id/thirdlayout"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_below="@+id/secondlayout"
+android:gravity="center">
+<Button
+android:id="@+id/clickme"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Button"
+android:visibility="invisible"
+android:layout_marginTop="100dp"/>
+</RelativeLayout>
+</RelativeLayout>
+
+
+                              Main_Activity.java
+                              
+package com.example.multithread;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.widget.Button;
+import android.widget.TextView;
+public class MainActivity extends Activity {
+Handler hand = new Handler();
+Button clickme;
+TextView timer;
+@SuppressLint("MissingInflatedId")
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+timer = (TextView) findViewById(R.id.timer);
+clickme = (Button) findViewById(R.id.clickme);
+// Initial time in seconds (you can set your desired starting time here)
+timer.setText("7");
+// Start the countdown
+hand.postDelayed(run, 1000);
+}
+Runnable run = new Runnable() {
+@Override
+public void run() {
+updateTime();
+}
+};
+public void updateTime() {
+// Get the current timer value, subtract 1 and update the text
+int currentTime = Integer.parseInt(timer.getText().toString());
+currentTime -= 1;
+timer.setText(String.valueOf(currentTime));
+// If time reaches 0, make the button visible
+if (currentTime == 0) {
+clickme.setVisibility(Button.VISIBLE);
+} else {
+// Continue the countdown
+hand.postDelayed(run, 1000);
+}
+}
+}
