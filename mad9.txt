@@ -1,0 +1,191 @@
+                        Activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:gravity="center"
+android:padding="16dp">
+<TextView
+android:id="@+id/txtSname"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Now Playing:"
+android:textAppearance="?android:attr/textAppearanceMedium"
+android:layout_marginBottom="16dp" />
+<ImageView
+android:id="@+id/imgLogo"
+android:layout_width="300dp"
+android:layout_height="300dp"
+android:src="@drawable/img"
+android:scaleType="centerCrop"
+android:layout_marginBottom="16dp" />
+<SeekBar
+android:id="@+id/seek_Bar"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginBottom="8dp" />
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:orientation="horizontal"
+android:gravity="center">
+<TextView
+android:id="@+id/StartTimebtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="0 min 0 sec" />
+<TextView
+android:id="@+id/Song_t_txtview"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginLeft="210dp"
+android:text="0 min 0 sec" />
+</LinearLayout>
+<LinearLayout
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="horizontal"
+android:layout_marginTop="20dp"
+android:gravity="center">
+<ImageButton
+android:id="@+id/Backwardbtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:src="@android:drawable/ic_media_rew"
+android:background="@null"
+android:layout_margin="8dp" />
+<ImageButton
+android:id="@+id/Playbtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:src="@android:drawable/ic_media_play"
+android:background="@null"
+android:layout_margin="8dp" />
+<ImageButton
+android:id="@+id/Pausebtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:src="@android:drawable/ic_media_pause"
+android:background="@null"
+android:layout_margin="8dp" />
+<ImageButton
+android:id="@+id/Forwardbtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:src="@android:drawable/ic_media_ff"
+android:background="@null"
+android:layout_margin="8dp" />
+</LinearLayout>
+</LinearLayout>
+
+                              Main_Activity.java
+package com.example.mediaplayer;
+import android.media.MediaPlayer;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.concurrent.TimeUnit;
+public class MainActivity extends AppCompatActivity {
+private ImageButton forward, backward, pause, play;
+private TextView songName, startTimeText, endTimeText;
+private SeekBar seekBar;
+private MediaPlayer mediaPlayer;
+private Handler handler = new Handler();
+private static int startTime = 0;
+private static int endTime = 0;
+private static final int forwardTime = 5000;
+private static final int backwardTime = 5000;
+private Runnable updateSongTime = new Runnable() {
+@Override
+public void run() {
+startTime = mediaPlayer.getCurrentPosition();
+startTimeText.setText(String.format("%d min, %d sec",
+TimeUnit.MILLISECONDS.toMinutes(startTime),
+TimeUnit.MILLISECONDS.toSeconds(startTime) -
+TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(startTime))
+));
+seekBar.setProgress(startTime);
+handler.postDelayed(this, 100);
+}
+};
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+backward = findViewById(R.id.Backwardbtn);
+forward = findViewById(R.id.Forwardbtn);
+play = findViewById(R.id.Playbtn);
+pause = findViewById(R.id.Pausebtn);
+songName = findViewById(R.id.txtSname);
+startTimeText = findViewById(R.id.StartTimebtn);
+endTimeText = findViewById(R.id.Song_t_txtview);
+seekBar = findViewById(R.id.seek_Bar);
+songName.setText("Yeno Naan");
+mediaPlayer = MediaPlayer.create(this, R.raw.yeno_naan);
+seekBar.setClickable(false);
+pause.setEnabled(false);
+play.setOnClickListener(v -> {
+Toast.makeText(MainActivity.this, "Song Started...", Toast.LENGTH_SHORT).show();
+mediaPlayer.start();
+endTime = mediaPlayer.getDuration();
+startTime = mediaPlayer.getCurrentPosition();
+seekBar.setMax(endTime);
+endTimeText.setText(String.format("%d min, %d sec",
+TimeUnit.MILLISECONDS.toMinutes(endTime),
+TimeUnit.MILLISECONDS.toSeconds(endTime) -
+TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(endTime))
+));
+startTimeText.setText(String.format("%d min, %d sec",
+TimeUnit.MILLISECONDS.toMinutes(startTime),
+TimeUnit.MILLISECONDS.toSeconds(startTime) -
+TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(startTime))
+));
+seekBar.setProgress(startTime);
+handler.postDelayed(updateSongTime, 100);
+pause.setEnabled(true);
+play.setEnabled(false);
+});
+pause.setOnClickListener(v -> {
+mediaPlayer.pause();
+pause.setEnabled(false);
+play.setEnabled(true);
+Toast.makeText(MainActivity.this, "Song Paused...", Toast.LENGTH_SHORT).show();
+});
+forward.setOnClickListener(v -> {
+if ((startTime + forwardTime) <= endTime) {
+startTime += forwardTime;
+mediaPlayer.seekTo(startTime);
+Toast.makeText(MainActivity.this, "Forwarded 5 seconds", Toast.LENGTH_SHORT).show();
+} else {
+Toast.makeText(MainActivity.this, "Cannot forward further", Toast.LENGTH_SHORT).show();
+}
+});
+backward.setOnClickListener(v -> {
+if ((startTime - backwardTime) > 0) {
+startTime -= backwardTime;
+mediaPlayer.seekTo(startTime);
+Toast.makeText(MainActivity.this, "Rewinded 5 seconds", Toast.LENGTH_SHORT).show();
+} else {
+Toast.makeText(MainActivity.this, "Cannot rewind further", Toast.LENGTH_SHORT).show();
+}
+});
+}
+@Override
+protected void onDestroy() {
+super.onDestroy();
+if (mediaPlayer != null) {
+if (mediaPlayer.isPlaying()) {
+mediaPlayer.stop();
+}
+mediaPlayer.release();
+mediaPlayer = null;
+}
+handler.removeCallbacks(updateSongTime);
+}
+}
