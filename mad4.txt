@@ -1,0 +1,67 @@
+            Activity_main.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+android:padding="20dp"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+<EditText
+android:id="@+id/messageEditText"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:hint="Enter Message" />
+<TimePicker
+android:id="@+id/timePicker"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content" />
+<Button
+android:id="@+id/setButton"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Set Reminder"
+android:layout_gravity="center"/>
+</LinearLayout>
+
+
+          Main_Activity.java
+package com.example.reminderapp;
+import android.os.Bundle;
+import android.os.Handler;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TimePicker;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import java.util.Calendar;
+public class MainActivity extends AppCompatActivity {
+EditText edtMessage;
+TimePicker timePicker;
+Button btnSet;
+Handler handler = new Handler();
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+edtMessage = findViewById(R.id.messageEditText);
+timePicker = findViewById(R.id.timePicker);
+btnSet = findViewById(R.id.setButton);
+timePicker.setIs24HourView(true);
+btnSet.setOnClickListener(v -> {
+String message = edtMessage.getText().toString();
+Calendar now = Calendar.getInstance();
+Calendar target = Calendar.getInstance();
+target.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+target.set(Calendar.MINUTE, timePicker.getMinute());
+target.set(Calendar.SECOND, 0);
+if (target.before(now)) {
+target.add(Calendar.DAY_OF_MONTH, 1); // Next day if time already passed
+}
+long delay = target.getTimeInMillis() - now.getTimeInMillis();
+Toast.makeText(this, "Reminder set!", Toast.LENGTH_SHORT).show();
+handler.postDelayed(() -> {
+Toast.makeText(this, "Reminder: " + message, Toast.LENGTH_LONG).show();
+}, delay);
+});
+}
+}
