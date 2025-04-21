@@ -1,0 +1,160 @@
+            Activity_main.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:background="#454545"
+tools:context=".MainActivity">
+<TextView
+android:id="@+id/textView1"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_alignParentTop="true"
+android:layout_centerHorizontal="true"
+android:layout_marginTop="42dp"
+android:textAppearance="?android:attr/textAppearanceMedium" />
+<TextView
+android:id="@+id/tv_title"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Sign in"
+android:textSize="30sp"
+android:layout_centerHorizontal="true"
+android:textColor="#FFFFFF"
+android:layout_marginTop="150dp"
+android:textStyle="bold"
+android:layout_marginBottom="40dp" />
+<TextView
+android:id="@+id/textView2"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_alignTop="@+id/textView1"
+android:layout_marginTop="190dp"
+android:textColor="#FFFFFF"
+android:layout_centerHorizontal="true"
+android:text="User Name"
+android:textAppearance="?android:attr/textAppearanceMedium" />
+<EditText
+android:id="@+id/editText1"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_below="@+id/textView1"
+android:textColor="#FFFFFF"
+android:layout_centerHorizontal="true"
+android:layout_marginTop="210dp"
+android:ems="10">
+<requestFocus />
+</EditText>
+<TextView
+android:id="@+id/textView3"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_centerHorizontal="true"
+android:layout_marginTop="15dp"
+android:textColor="#FFFFFF"
+android:layout_centerVertical="true"
+android:text="Password"
+android:textAppearance="?android:attr/textAppearanceMedium" />
+<EditText
+android:id="@+id/editText2"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_below="@+id/textView3"
+android:textColor="#FFFFFF"
+android:layout_centerHorizontal="true"
+android:layout_marginTop="20dp"
+android:ems="10"
+android:inputType="textPassword" />
+<Button
+android:id="@+id/button1"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_below="@+id/editText2"
+android:layout_alignRight="@+id/textView2"
+android:layout_marginTop="40dp"
+android:text="Login" />
+</RelativeLayout>
+
+                          Second.xml
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:background="#454545"
+android:layout_height="match_parent">
+<TextView
+android:id="@+id/textView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_x="106dp"
+android:layout_y="141dp"
+android:text="Succesfully Login"
+android:textColor="#FFFFFF"
+android:textSize="25dp" />
+</AbsoluteLayout>
+
+                            Third.xml
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:background="#454545"
+android:layout_height="match_parent">
+<TextView
+android:id="@+id/textView"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_x="146dp"
+android:layout_y="141dp"
+android:text="Login Failed"
+android:textColor="#FFFFFF"
+android:textSize="25dp" />
+</AbsoluteLayout>
+
+
+                                      Main_Activity.java
+package com.example.signin;
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+public class MainActivity extends Activity {
+EditText A, B;
+Button C;
+String E, F;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+// Initialize EditText and Button
+A = (EditText) findViewById(R.id.editText1);
+B = (EditText) findViewById(R.id.editText2);
+C = (Button) findViewById(R.id.button1);
+// Set onClickListener for login button
+C.setOnClickListener(new OnClickListener() {
+@Override
+public void onClick(View v) {
+// Get the entered username and password
+E = A.getText().toString();
+F = B.getText().toString();
+// Check if the credentials are correct
+if (E.equals("BoLt") && F.equals("asdfghjkl;'")) {
+// Switch to successful login screen
+setContentView(R.layout.second);
+} else {
+// Switch to failed login screen
+setContentView(R.layout.third);
+}
+}
+});
+}
+@Override
+public boolean onCreateOptionsMenu(Menu menu) {
+// Inflate the menu; this adds items to the action bar if it is present
+getMenuInflater().inflate(R.menu.activity_main, menu);
+return true;
+}
+}
