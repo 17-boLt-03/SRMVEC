@@ -189,3 +189,117 @@ mediaPlayer = null;
 handler.removeCallbacks(updateSongTime);
 }
 }
+
+
+
+
+                  Simple code -----> Dont use this I not even check this code whether it is working well or not
+
+              Activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtSname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Now Playing:"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginBottom="16dp" />
+
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:src="@drawable/img"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="24dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/Playbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_play"
+            android:background="@null"
+            android:layout_margin="16dp" />
+
+        <ImageButton
+            android:id="@+id/Pausebtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_pause"
+            android:background="@null"
+            android:layout_margin="16dp" />
+    </LinearLayout>
+
+</LinearLayout>
+
+
+          Activity_main.java
+
+package com.example.mediaplayer;
+
+import android.media.MediaPlayer;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+    private ImageButton play, pause;
+    private TextView songName;
+    private MediaPlayer mediaPlayer;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        play = findViewById(R.id.Playbtn);
+        pause = findViewById(R.id.Pausebtn);
+        songName = findViewById(R.id.txtSname);
+
+        songName.setText("Yeno Naan");
+        mediaPlayer = MediaPlayer.create(this, R.raw.yeno_naan);
+        pause.setEnabled(false);
+
+        play.setOnClickListener(v -> {
+            mediaPlayer.start();
+            Toast.makeText(MainActivity.this, "Song Started...", Toast.LENGTH_SHORT).show();
+            play.setEnabled(false);
+            pause.setEnabled(true);
+        });
+
+        pause.setOnClickListener(v -> {
+            mediaPlayer.pause();
+            Toast.makeText(MainActivity.this, "Song Paused...", Toast.LENGTH_SHORT).show();
+            pause.setEnabled(false);
+            play.setEnabled(true);
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+    }
+}
