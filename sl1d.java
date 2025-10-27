@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Vigenerecipher {
+public class sl1d {
     public static String key = new String();
     public String extndkey;
     public String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
