@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Caesercipher {
+public class sl1a {
 
     public static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
 
