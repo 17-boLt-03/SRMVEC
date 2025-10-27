@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Hillcipher {
+public class sl1c {
     public int keyinverse[][] = new int[3][3];
     public int key[][] = { {17, 17, 5}, {21, 18, 21}, {2, 2, 19} };
     public int plainmat[][] = new int[8][3];
