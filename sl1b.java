@@ -1,7 +1,7 @@
 import java.util.*;
 import java.io.*;
 
-public class Playfairs {
+public class sl1b {
 
     private char pfmatrix[][] = new char[5][5];
     public String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
