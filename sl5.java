@@ -1,6 +1,6 @@
 import java.math.BigInteger;
 import java.util.Random;
-public class RSA {
+public class sl5 {
     private BigInteger p, q, n, phi, e, d;
     private int bitLen = 1024;
     private Random rand;
