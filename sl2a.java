@@ -11,12 +11,43 @@ public class sl2a {
             rail[row].append(c);
             if (row == 0 || row == key - 1)
                 down = !down;
-
             row += down ? 1 : -1;
         }
         StringBuilder result = new StringBuilder();
         for (StringBuilder sb : rail)
             result.append(sb);
+        return result.toString();
+    }
+    public static String decrypt(String cipher, int key) {
+        if (key == 1) return cipher;
+        boolean down = false;
+        int row = 0;
+        char[][] rail = new char[key][cipher.length()];
+        for (int i = 0; i < key; i++)
+            Arrays.fill(rail[i], '\n');
+        for (int i = 0; i < cipher.length(); i++) {
+            rail[row][i] = '*';
+            if (row == 0 || row == key - 1)
+                down = !down;
+            row += down ? 1 : -1;
+        }
+        int index = 0;
+        for (int i = 0; i < key; i++) {
+            for (int j = 0; j < cipher.length(); j++) {
+                if (rail[i][j] == '*' && index < cipher.length()) {
+                    rail[i][j] = cipher.charAt(index++);
+                }
+            }
+        }
+        StringBuilder result = new StringBuilder();
+        down = false;
+        row = 0;
+        for (int i = 0; i < cipher.length(); i++) {
+            result.append(rail[row][i]);
+            if (row == 0 || row == key - 1)
+                down = !down;
+            row += down ? 1 : -1;
+        }
         return result.toString();
     }
     public static void main(String[] args) {
@@ -27,5 +58,7 @@ public class sl2a {
         int key = sc.nextInt();
         String cipher = encrypt(text, key);
         System.out.println("Encrypted Text: " + cipher);
+        String decrypted = decrypt(cipher, key);
+        System.out.println("Decrypted Text: " + decrypted);
     }
 }
