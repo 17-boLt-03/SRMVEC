@@ -4,7 +4,7 @@ import java.util.Scanner;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-public class AES {
+public class sl4 {
     private static final String encryptionKey = "ABCDEFGHIJKLMNOP";
     private static final String characterEncoding = "UTF-8";
     private static final String cipherTransformation = "AES/CBC/PKCS5PADDING";
