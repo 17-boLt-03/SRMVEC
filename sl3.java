@@ -6,7 +6,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 import java.util.Random;
-public class DES {
+public class sl3 {
     byte[] skey = new byte[1000];
     String skeyString;
     static byte[] raw;
