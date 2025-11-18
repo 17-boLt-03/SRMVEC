@@ -1,3 +1,4 @@
+% -------- Water Jug Problem (4L & 3L Jugs) --------
 :- dynamic rstate/2.
 goal(2,_).  % target state
 state(X,Y) :-
@@ -21,3 +22,5 @@ move(X,Y,NX,NY) :-
     Y < 3, X > 0,
     T is min(3-Y, X),
     NX is X - T, NY is Y + T.
+% -------- Goal --------
+?- retractall(rstate(_,_)), state(0,0).
