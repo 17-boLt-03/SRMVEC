@@ -1,3 +1,5 @@
+% -------- Monkey and Banana Problem --------
+
 go :-
     take("Monkey","Stick"),
     move("Monkey","Chair"),
@@ -33,3 +35,6 @@ hit(Animal,Object,Fruit) :-
     write(" with the "), write(Object), write(" ? (y/n) "),
     get_char(Reply), get_char(_),
     Reply = 'y'.
+
+% -------- Goal --------
+?- go.
