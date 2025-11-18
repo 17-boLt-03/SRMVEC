@@ -1,3 +1,5 @@
+% -------- Depth First Search --------
+
 % Facts
 child(a,b).   % b is child of a
 child(a,c).   % c is child of a
@@ -18,3 +20,6 @@ childnode(A, G, [G]) :-
 childnode(A, G, [X|L]) :-
     child(A, X),
     childnode(X, G, L).
+
+% -------- Goal --------
+?- path(a, g, Path).
