@@ -1,3 +1,5 @@
+% -------- Tower of Hanoi Program --------
+
 move(1, X, Y, _) :-
     write('Move top disk from '),
     write(X),
@@ -11,3 +13,6 @@ move(N, X, Y, Z) :-
     move(M, X, Z, Y),
     move(1, X, Y, _),
     move(M, Z, Y, X).
+
+% -------- Goal --------
+?- move(3, left, right, middle).
